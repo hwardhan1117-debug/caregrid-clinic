@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visit Report - CareGrid Clinic</title>
+  <style>
+    body { margin:0; font-family:"Segoe UI",Tahoma,Arial,sans-serif; background:#eef5f9; color:#1e2a35; }
+    .sheet { max-width:760px; margin:24px auto; background:#fff; border-radius:14px; box-shadow:0 4px 14px rgba(11,110,153,.12); overflow:hidden; }
+    .head { background:linear-gradient(135deg,#084c6b,#0b6e99 60%,#12a38a); color:#fff; padding:20px 28px; }
+    .head h1 { margin:0; font-size:22px; } .head small { opacity:.85; }
+    .body { padding:24px 28px; }
+    h3 { color:#084c6b; margin:22px 0 10px; font-size:16px; border-bottom:2px solid #eef5f9; padding-bottom:6px; }
+    .row { display:grid; grid-template-columns:170px 1fr; gap:8px; padding:6px 0; font-size:14px; }
+    .row b { color:#6b7c8a; font-weight:600; }
+    .stats { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:8px; }
+    .stat { background:#f4f9fb; border-left:5px solid #12a38a; border-radius:10px; padding:12px 16px; }
+    .stat .n { font-size:26px; font-weight:700; color:#084c6b; } .stat .l { font-size:12px; color:#6b7c8a; }
+    .actions { padding:0 28px 24px; display:flex; gap:10px; }
+    .actions a, .actions button { padding:10px 20px; border-radius:10px; border:none; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; background:#0b6e99; color:#fff; }
+    @media print { .actions { display:none; } body { background:#fff; } .sheet { box-shadow:none; margin:0; } }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="head"><h1>CareGrid Clinic - Patient Visit Report</h1><small>Report No. {{ r.id }}</small></div>
+    <div class="body">
+      <h3>Patient and Appointment</h3>
+      <div class="row"><b>Patient</b><span>{{ r.patient }}</span></div>
+      <div class="row"><b>Phone</b><span>{{ r.phone }}</span></div>
+      <div class="row"><b>Doctor</b><span>{{ r.doctor }}</span></div>
+      <div class="row"><b>Appointment</b><span>{{ r.date }} at {{ r.slot }}</span></div>
+      <div class="row"><b>Status</b><span>{{ r.status }}</span></div>
+
+      <h3>Visit Timeline</h3>
+      <div class="row"><b>Booked at</b><span>{{ r.booked_at or '-' }}</span></div>
+      <div class="row"><b>Arrived (check-in)</b><span>{{ r.checkin_at or '-' }}</span></div>
+      <div class="row"><b>Consultation started</b><span>{{ r.consult_at or '-' }}</span></div>
+      <div class="row"><b>Left (discharge)</b><span>{{ r.checkout_at or '-' }}</span></div>
+      <div class="stats">
+        <div class="stat"><div class="n">{{ wait if wait is not none else '-' }} min</div><div class="l">Waiting time</div></div>
+        <div class="stat"><div class="n">{{ total if total is not none else '-' }} min</div><div class="l">Total time in clinic</div></div>
+      </div>
+
+      <h3>Medical Report</h3>
+      <div class="row"><b>Diagnosis</b><span>{{ r.diagnosis or '-' }}</span></div>
+      <div class="row"><b>Prescription</b><span>{{ r.prescription or '-' }}</span></div>
+      <div class="row"><b>Doctor's notes</b><span>{{ r.notes or '-' }}</span></div>
+      <div class="row"><b>Follow-up date</b><span>{{ r.followup or '-' }}</span></div>
+    </div>
+    <div class="actions"><a href="/">Back to Appointments</a><button onclick="window.print()">Print / Save as PDF</button></div>
+  </div>
+</body>
+</html>

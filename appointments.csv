@@ -1,0 +1,2 @@
+id,patient,phone,doctor,date,slot,status,booked_at,checkin_at,consult_at,checkout_at,wait_min,visit_min,diagnosis,prescription,notes,followup
+2,Harsh Maurya,7567547657,Dr. Sharma (General),2026-10-29,10:00,Booked,2026-10-29 21:35:18,,,,,,,,,

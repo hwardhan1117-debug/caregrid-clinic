@@ -1,0 +1,46 @@
+CAREGRID CLINIC - PROJECT NOTES
+
+SETUP
+- Project: CareGrid Clinic, appointment booking system (Healthcare)
+- Stack: Python Flask, SQLite, Gunicorn, HTML/CSS, Docker
+- Docker image: clinic-app:2.0, container: clinic, port 5000
+- Data: Docker volume clinic-data (/data/clinic.db)
+- Gunicorn: 1 worker + 4 threads (so the Live Status counters stay in one place)
+
+FEATURES
+- Appointment booking with double-booking protection
+- Visit Lifecycle: Booked > Checked-in > In Consultation > Completed
+- Medical report: diagnosis, prescription, notes, follow-up date
+- Waiting time and total visit time (calculated automatically)
+- Live Status page (/status): uptime, requests, response time, SLA meter
+- Admin Dashboard (/admin): doctor-wise chart, status chart, waiting time vs SLA
+- CSV export (/export.csv)
+- /health endpoint
+
+SLA TARGETS (set by us)
+- TTR: under 30 seconds
+- Availability: 99.5%
+- Response time: under 2000 ms
+- Waiting time: under 20 minutes
+
+TTR TEST (crashed the main process inside the container; Docker restarted it automatically)
+Version 1.0: 1.08 / 1.47 / 0.49 sec, average 1.01 sec
+Version 2.0: 1.53 / 1.45 / 0.65 sec, average 1.21 sec
+The restart count increased by 1 in every run (this is the proof).
+Measured on: Docker, local PC (AWS EC2 result to be added later)
+
+OBSERVATIONS
+- With docker kill, the container stopped and did NOT come back by itself;
+  we had to run docker start clinic manually.
+  Meaning: the restart policy does not restart a container that a person
+  stopped on purpose, but it does restart it when the app crashes inside.
+- Earlier there were 2 gunicorn workers, so the Live Status numbers were split
+  between them. Using 1 worker with threads fixed this.
+
+REMAINING WORK
+- Deploy on AWS EC2 and measure TTR there
+- CloudWatch screenshot
+- Local load test (latency, throughput)
+- Update the PPT (new features + AWS results)
+- Confirm that data survives a container restart: open localhost:5000
+  after a restart and check that the old appointments are still there

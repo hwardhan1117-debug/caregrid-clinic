@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CareGrid Clinic - Appointment Portal</title>
+  <style>
+    :root { --primary:#0b6e99; --primary-dark:#084c6b; --accent:#12a38a; --bg:#eef5f9; --text:#1e2a35; --muted:#6b7c8a; --border:#dbe6ee; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:"Segoe UI",Tahoma,Arial,sans-serif; background:var(--bg); color:var(--text); }
+    .topbar { background:linear-gradient(135deg,var(--primary-dark),var(--primary) 60%,var(--accent)); color:#fff; padding:18px 0; box-shadow:0 2px 10px rgba(0,0,0,.15); }
+    .wrap { max-width:1100px; margin:0 auto; padding:0 18px; }
+    .topbar .wrap { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .logo { width:46px; height:46px; border-radius:12px; background:#fff; display:flex; align-items:center; justify-content:center; }
+    .brand h1 { margin:0; font-size:22px; letter-spacing:.5px; }
+    .brand small { opacity:.85; font-size:12px; }
+    .status { background:rgba(255,255,255,.18); padding:6px 14px; border-radius:20px; font-size:13px; text-decoration:none; color:#fff; }
+    .dot { display:inline-block; width:9px; height:9px; background:#5dffb0; border-radius:50%; margin-right:6px; }
+    .hero { padding:28px 0 8px; }
+    .hero h2 { margin:0 0 6px; font-size:26px; color:var(--primary-dark); }
+    .hero p { margin:0; color:var(--muted); }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:20px 0; }
+    .stat { background:#fff; border-radius:14px; padding:16px 18px; border:1px solid var(--border); border-left:5px solid var(--primary); box-shadow:0 2px 6px rgba(11,110,153,.06); }
+    .stat:nth-child(2) { border-left-color:#f4a825; }
+    .stat:nth-child(3) { border-left-color:var(--accent); }
+    .stat .num { font-size:30px; font-weight:700; color:var(--primary-dark); }
+    .stat .lbl { font-size:13px; color:var(--muted); }
+    .card { background:#fff; border-radius:16px; padding:24px; border:1px solid var(--border); margin-bottom:22px; box-shadow:0 4px 14px rgba(11,110,153,.07); }
+    .card h3 { margin:0 0 18px; color:var(--primary-dark); font-size:18px; padding-bottom:12px; border-bottom:2px solid var(--bg); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+    .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+    .field label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px; }
+    .field input, .field select, .field textarea { width:100%; padding:10px 12px; font-size:14px; border:1.5px solid var(--border); border-radius:10px; background:#fafcfd; font-family:inherit; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(11,110,153,.15); }
+    .btn { background:linear-gradient(135deg,var(--primary),var(--accent)); color:#fff; border:none; padding:12px 26px; font-size:15px; font-weight:600; border-radius:10px; cursor:pointer; margin-top:16px; }
+    .btn:hover { box-shadow:0 6px 14px rgba(11,110,153,.3); }
+    .btn-sm { padding:6px 12px; font-size:12px; margin:0; border-radius:8px; border:none; cursor:pointer; color:#fff; font-weight:600; }
+    .b-in { background:#0b6e99; } .b-consult { background:#f4a825; } .b-cancel { background:#fff; color:#c0392b; border:1.5px solid #f1c3be; }
+    .b-cancel:hover { background:#c0392b; color:#fff; }
+    .link-btn { font-size:13px; text-decoration:none; color:var(--primary); border:1.5px solid var(--primary); padding:5px 12px; border-radius:8px; font-weight:600; }
+    .link-btn:hover { background:var(--primary); color:#fff; }
+    .msg { padding:13px 16px; border-radius:10px; margin-bottom:20px; font-weight:500; background:#e3f6ee; border-left:5px solid var(--accent); color:#0d5c49; }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; min-width:820px; }
+    th { text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); padding:10px 12px; background:#f5f9fc; }
+    td { padding:12px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle; }
+    tr.data:hover td { background:#f8fcfe; }
+    .badge { background:#e1f1f8; color:var(--primary-dark); padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; white-space:nowrap; }
+    .st { padding:4px 10px; border-radius:20px; font-size:12px; font-weight:700; white-space:nowrap; }
+    .st-booked { background:#e1f1f8; color:#084c6b; } .st-checked-in { background:#fff3d6; color:#8a5a00; }
+    .st-in-consultation { background:#ffe3cf; color:#9a3d00; } .st-completed { background:#dcf5e8; color:#0d5c49; }
+    .small { font-size:12px; color:var(--muted); }
+    .actions { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+    .actions form { margin:0; }
+    .formrow td { background:#fffaf2; }
+    .formrow .grid { grid-template-columns:repeat(2,1fr); }
+    .empty { text-align:center; padding:30px; color:var(--muted); }
+    footer { text-align:center; color:var(--muted); font-size:12px; padding:10px 0 30px; }
+    @media (max-width:640px) { .grid,.stats { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="topbar"><div class="wrap">
+    <div class="brand">
+      <div class="logo"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0b6e99"><path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7z"/></svg></div>
+      <div><h1>CareGrid Clinic</h1><small>Online Appointment Portal</small></div>
+    </div>
+    <div>
+  <div>
+  <a class="status" href="/admin">Admin Dashboard</a>
+  <a class="status" href="/status"><span class="dot"></span>System Online - Live Status</a>
+</div>
+</div>
+  </div></div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h2>Book Your Doctor Appointment</h2>
+      <p>Quick, easy and available 24x7. Track every patient visit from booking to discharge.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num">{{ rows|length }}</div><div class="lbl">Total Appointments</div></div>
+      <div class="stat"><div class="num">{{ rows|selectattr("status","in",["Checked-in","In Consultation"])|list|length }}</div><div class="lbl">Patients in Clinic Now</div></div>
+      <div class="stat"><div class="num">{{ rows|selectattr("status","equalto","Completed")|list|length }}</div><div class="lbl">Visits Completed</div></div>
+    </div>
+
+    {% if msg %}<div class="msg">{{ msg }}</div>{% endif %}
+
+    <div class="card">
+      <h3>Patient Registration &amp; Booking</h3>
+      <form method="POST" action="/book">
+        <div class="grid">
+          <div class="field"><label>Patient Name</label><input name="patient" placeholder="Enter full name" required></div>
+          <div class="field"><label>Phone Number</label><input name="phone" placeholder="10-digit mobile number" required></div>
+          <div class="field"><label>Select Doctor</label><select name="doctor">{% for d in doctors %}<option>{{ d }}</option>{% endfor %}</select></div>
+          <div class="field"><label>Appointment Date</label><input type="date" name="date" id="apptDate" required></div>
+          <div class="field"><label>Time Slot</label><select name="slot">{% for s in slots %}<option>{{ s }}</option>{% endfor %}</select></div>
+        </div>
+        <button class="btn" type="submit">Confirm Appointment</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Patient Visits <a class="link-btn" href="/export.csv">Export CSV</a></h3>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Patient</th><th>Doctor</th><th>Date &amp; Slot</th><th>Status</th><th>Visit Times</th><th>Action</th></tr>
+          {% for r in rows %}
+          <tr class="data">
+            <td><b>{{ r.patient }}</b><div class="small">{{ r.phone }}</div></td>
+            <td><span class="badge">{{ r.doctor }}</span></td>
+            <td>{{ r.date }}<div class="small">{{ r.slot }}</div></td>
+            <td><span class="st st-{{ (r.status or 'Booked')|lower|replace(' ','-') }}">{{ r.status or 'Booked' }}</span></td>
+            <td class="small">
+              {% if r.checkin_at %}In: {{ r.checkin_at[11:16] }}{% else %}Not arrived{% endif %}
+              {% if r.consult_at %}<br>Seen: {{ r.consult_at[11:16] }}{% endif %}
+              {% if r.checkout_at %}<br>Out: {{ r.checkout_at[11:16] }}{% endif %}
+            </td>
+            <td><div class="actions">
+              {% if r.status == 'Booked' or not r.status %}
+                <form method="POST" action="/checkin/{{ r.id }}"><button class="btn-sm b-in">Check-in</button></form>
+                <form method="POST" action="/cancel/{{ r.id }}" onsubmit="return confirm('Cancel this appointment?');"><button class="btn-sm b-cancel">Cancel</button></form>
+              {% elif r.status == 'Checked-in' %}
+                <form method="POST" action="/consult/{{ r.id }}"><button class="btn-sm b-consult">Start Consultation</button></form>
+              {% elif r.status == 'In Consultation' %}
+                <span class="small">Fill report below</span>
+              {% else %}
+                <a class="link-btn" href="/report/{{ r.id }}">View Report</a>
+              {% endif %}
+            </div></td>
+          </tr>
+          {% if r.status == 'In Consultation' %}
+          <tr class="formrow"><td colspan="6">
+            <form method="POST" action="/complete/{{ r.id }}">
+              <div class="grid">
+                <div class="field"><label>Diagnosis</label><input name="diagnosis" placeholder="e.g. Viral fever" required></div>
+                <div class="field"><label>Prescription</label><input name="prescription" placeholder="e.g. Paracetamol 500mg, rest"></div>
+                <div class="field"><label>Doctor's Notes</label><textarea name="notes" rows="2" placeholder="Short notes"></textarea></div>
+                <div class="field"><label>Follow-up Date</label><input type="date" name="followup"></div>
+              </div>
+              <button class="btn" type="submit">Complete Visit &amp; Discharge</button>
+            </form>
+          </td></tr>
+          {% endif %}
+          {% else %}
+          <tr><td colspan="6" class="empty">No appointments yet. Book the first one above.</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer>CareGrid Clinic | Powered by Flask, Docker &amp; AWS | Mini Project - Cloud Computing</footer>
+  <script>
+    var d = new Date();
+    var today = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    var el = document.getElementById("apptDate"); el.min = today; el.value = today;
+  </script>
+</body>
+</html>

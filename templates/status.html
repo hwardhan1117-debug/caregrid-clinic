@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live Status - CareGrid Clinic</title>
+  <style>
+    :root { --primary:#0b6e99; --dark:#084c6b; --accent:#12a38a; --bg:#eef5f9; --muted:#6b7c8a; --border:#dbe6ee; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:"Segoe UI",Tahoma,Arial,sans-serif; background:var(--bg); color:#1e2a35; }
+    .top { background:linear-gradient(135deg,var(--dark),var(--primary) 60%,var(--accent)); color:#fff; padding:18px 0; }
+    .wrap { max-width:1000px; margin:0 auto; padding:0 18px; }
+    .top .wrap { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+    .top h1 { margin:0; font-size:22px; } .top a { color:#fff; font-size:13px; background:rgba(255,255,255,.18); padding:6px 14px; border-radius:20px; text-decoration:none; }
+    .banner { margin:22px 0 18px; padding:22px 26px; border-radius:16px; color:#fff; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; background:#12a38a; box-shadow:0 4px 14px rgba(0,0,0,.12); }
+    .banner.down { background:#c0392b; } .banner.bad { background:#e67e22; }
+    .banner .big { font-size:30px; font-weight:800; letter-spacing:.5px; } .banner .sub { font-size:14px; opacity:.92; }
+    .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+    .card { background:#fff; border-radius:14px; padding:18px; border:1px solid var(--border); border-left:5px solid var(--primary); box-shadow:0 2px 6px rgba(11,110,153,.06); }
+    .card:nth-child(2) { border-left-color:#f4a825; } .card:nth-child(3) { border-left-color:var(--accent); } .card:nth-child(4) { border-left-color:#c0392b; }
+    .num { font-size:28px; font-weight:700; color:var(--dark); } .lbl { font-size:13px; color:var(--muted); }
+    .box { background:#fff; border-radius:16px; padding:22px; border:1px solid var(--border); margin-bottom:20px; box-shadow:0 4px 14px rgba(11,110,153,.07); }
+    .box h3 { margin:0 0 12px; color:var(--dark); font-size:17px; }
+    .row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:14px; } .row:last-child { border:none; }
+    .row span:first-child { color:var(--muted); }
+    .ev { padding:8px 12px; background:#f4f9fb; border-left:4px solid var(--accent); border-radius:8px; margin-bottom:8px; font-size:14px; }
+    .note { font-size:12px; color:var(--muted); margin-top:10px; }
+    @media (max-width:700px) { .cards { grid-template-columns:repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+  <div class="top"><div class="wrap"><h1>CareGrid Clinic - Live Service Status</h1><a href="/">Back to Appointments</a></div></div>
+  <div class="wrap">
+    <div class="banner" id="banner">
+      <div><div class="big" id="bigText">{{ "SLA MET" if m.sla_met else "SLA BREACHED" }}</div>
+      <div class="sub" id="subText">All systems operational</div></div>
+      <div class="sub" id="liveDot">Live - refreshing every 0.5 s</div>
+    </div>
+
+    <div class="cards">
+      <div class="card"><div class="num" id="uptime">{{ m.uptime_seconds }}s</div><div class="lbl">Uptime (since last restart)</div></div>
+      <div class="card"><div class="num" id="reqs">{{ m.requests }}</div><div class="lbl">Requests served</div></div>
+      <div class="card"><div class="num" id="avg">{{ m.avg_response_ms }} ms</div><div class="lbl">Average response time</div></div>
+      <div class="card"><div class="num" id="errs">{{ m.errors }}</div><div class="lbl">Server errors</div></div>
+    </div>
+
+    <div class="box">
+      <h3>SLA Targets</h3>
+      <div class="row"><span>Response time target</span><span>under {{ m.sla_response_ms }} ms</span></div>
+      <div class="row"><span>Availability target</span><span>99.5%</span></div>
+      <div class="row"><span>TTR target</span><span>under 30 seconds</span></div>
+      <div class="row"><span>Last restart</span><span id="started">{{ m.started_at }}</span></div>
+    </div>
+
+    <div class="box">
+      <h3>Recovery Events (seen from this browser)</h3>
+      <div id="events"><div class="note">No outage seen yet. If the container crashes, the downtime and recovery time will appear here.</div></div>
+      <div class="note">Recovery time is measured by this page and is accurate to about 2 seconds.</div>
+    </div>
+  </div>
+
+  <script>
+    var $ = function (id) { return document.getElementById(id); };
+    var downSince = null, events = [];
+    function fmt(s) {
+      var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+      return (h ? h + "h " : "") + (h || m ? m + "m " : "") + sec + "s";
+    }
+    function setBanner(cls, big, sub) {
+      $("banner").className = "banner " + cls; $("bigText").textContent = big; $("subText").textContent = sub;
+    }
+    function renderEvents() {
+      $("events").innerHTML = events.map(function (e) {
+        return '<div class="ev">' + e.t + ' - service was down, recovered in about <b>' + e.secs + ' s</b></div>';
+      }).join("");
+    }
+    function render(m) {
+      $("uptime").textContent = fmt(m.uptime_seconds); $("reqs").textContent = m.requests;
+      $("avg").textContent = m.avg_response_ms + " ms"; $("errs").textContent = m.errors; $("started").textContent = m.started_at;
+      if (m.sla_met) setBanner("", "SLA MET", "All systems operational"); else setBanner("bad", "SLA BREACHED", "Response time or errors above target");
+    }
+    function poll() {
+      var ctl = new AbortController(); var timer = setTimeout(function () { ctl.abort(); }, 1500);
+      fetch("/api/metrics", { cache: "no-store", signal: ctl.signal })
+        .then(function (r) { return r.json(); })
+        .then(function (m) {
+          clearTimeout(timer);
+          if (downSince) {
+            events.unshift({ t: new Date().toLocaleTimeString(), secs: ((Date.now() - downSince) / 1000).toFixed(1) });
+            downSince = null; renderEvents();
+          }
+          render(m);
+        })
+        .catch(function () {
+          clearTimeout(timer);
+          if (!downSince) downSince = Date.now();
+          setBanner("down", "SERVICE DOWN", "Waiting for automatic recovery: " + ((Date.now() - downSince) / 1000).toFixed(1) + " s");
+        });
+    }
+    setInterval(poll, 500);
+  </script>
+</body>
+</html>
